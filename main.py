@@ -40,15 +40,23 @@ async def get_instructors(db: Session = Depends(get_db)) -> list[Instructor]:
 
 
 @app.get("/instructors/{id}/courses")
-async def get_instructors_courses(id: int, db: Session = Depends(get_db)) -> list[str]:
+async def get_instructors_courses(id: int, db: Session = Depends(get_db)) -> dict[str, str]:
     instructor: Instructor | None = db.get(Instructor, id)
     if instructor is None:
         raise HTTPException(status_code=404, detail=f"Instructor with ID {id} not found!")
-    return [course.title for course in instructor.courses]
+    return {course.course_number: course.title for course in instructor.courses}
     #course_names: list[str] = []
     #for i in range(len(instructor.courses)):
     #    course_names.append(instructor.courses[i].title)
     #return course_names
+
+
+@app.get("/instructors/{id}/num-courses")
+async def get_number_of_courses(id: int, db: Session = Depends(get_db)) -> int:
+    instructor: Instructor | None = db.get(Instructor, id)
+    if instructor is None:
+        raise HTTPException(status_code=404, detail=f"Instructor with ID {id} not found!")
+    return len(instructor.courses)
 
 
 @app.post("/instructors", status_code=status.HTTP_201_CREATED)
